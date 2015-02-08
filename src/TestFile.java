@@ -1,6 +1,8 @@
 public class TestFile {
 
-	public int i;
+	public int i,j,k;
+	public static String m;
+	private NestedClass n;
 
 	public ConstructorMethod (){
 		if (0==0){
@@ -12,7 +14,7 @@ public class TestFile {
 			break;
 		};
 
-		class nestedClass {
+		class NestedClass extends TestFile{
 			public nestedMethod(){
 				int c;
 			}

@@ -92,103 +92,6 @@ public class TP2Visitor implements JavaParser1_7Visitor {
         return data;  
     }
     
-    
-    
-    /*
-     
-void NormalClassDeclaration():
-{
-}
-{
-	<CLASS> Identifier() [TypeParameters()] [<EXTENDS> Type()] [<IMPLEMENTS> TypeList()] ClassBody()
-}
-
-
-void ClassBody():
-{
-}
-{
-	<LBRACE> ( ClassBodyDeclaration() )* <RBRACE>
-}
-
-void ClassBodyDeclaration():
-{
-}
-{
-	<SEMICOLON>
-	|
-	( ((Modifier())*)#ModifierList MemberDecl() )   
-	|
-	( [<STATIC>] Block() ) #StaticInitBlock()
-}
-     
-modifier contains "public" "private"...
-
-void MemberDecl():
-{
-}
-{
-	MethodOrFieldDecl()
-	|
-	( <VOID> Identifier() VoidMethodDeclaratorRest() ) #VoidMethodDecl()
-	|
-	( Identifier() ConstructorDeclaratorRest() ) #ConstructorDecl()
-	|
-	GenericMethodOrConstructorDecl()
-	|
-	ClassDeclaration() 
-	|
-	InterfaceDeclaration()
-}
-*/
-    
-    public Object visit(MemberDecl node, Object data){
-    	 
-    	// get it's visibility
-    	String memberVisibility = "";
-    	ClassBodyDeclaration cbdNode = (ClassBodyDeclaration) node.parent;
-    	
-    	for(int i=0; i<cbdNode.jjtGetNumChildren(); i++){
-    		SimpleNode childNode = (SimpleNode) cbdNode.jjtGetChild(i);
-            if (childNode.toString() == "Modifier"){
-            	String memberVisibilityName = childNode.jjtGetFirstToken().toString(); 
-            	switch (memberVisibilityName) {
-	                case "public":  	memberVisibility = "+"; break;
-	                case "private":  	memberVisibility = "-"; break;
-	                case "protected":  	memberVisibility = "#"; break;
-	                case "package":  	memberVisibility = "~"; break;
-	                default: break;
-	            }
-            }
-    	}
-    	
-    	// get its name(identify) and type
-    	String memberName = ""; 
-    	String memberType = ""; //method or attribute;
-    	String methodReturnType = "";
-    	String attributeType;
-    	
-    	String memberFirstChild = node.jjtGetChild(0).toString();
-    	switch(memberFirstChild){
-    		case "VoidMethodDecl": 
-    			memberName = ((Identifier)node.jjtGetChild(0).jjtGetChild(1)).jjtGetFirstToken().toString();
-    			memberType = "method";
-    			methodReturnType = "void";
-    			break;
-    		case "ConstructorDecl":
-    			memberName = ((Identifier)node.jjtGetChild(0).jjtGetChild(0)).jjtGetFirstToken().toString();
-    			memberType = "method";
-    			methodReturnType = "void";
-    			break;    			
-    	}
-    	
-    	
-    	
-    	
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
      
     public Object visit(MethodBody node, Object data){
     	
@@ -201,8 +104,12 @@ void MemberDecl():
             for (int i = 0; i < currentNode.jjtGetNumChildren(); i++){
                 SimpleNode childNode = (SimpleNode)currentNode.jjtGetChild(i);
                 if (childNode.toString() == "Type"){
-                	// need to get the real return type
-                	methodReturnType = childNode.toString();
+                	methodReturnType = "";
+                	Token t = childNode.jjtGetFirstToken();
+                	while(t != null){
+                		methodReturnType = methodReturnType + t.toString();
+                		t = t.next;
+                	}
                 }
                 
                 if (childNode.toString() == "Identifier"){
@@ -235,13 +142,13 @@ void MemberDecl():
 	                case "private":  	methodVisibility = "-"; break;
 	                case "protected":  	methodVisibility = "#"; break;
 	                case "package":  	methodVisibility = "~"; break;
-	                default: break;
+	                default: 			methodVisibility = ""; break;
 	            }
     		}
     	}    	
     	
     	//get method parameters
-    	String parameters;
+    	String parameters = "";
     	SimpleNode methodDeclaratorNode = (SimpleNode) node.parent;
     	FormalParameters formalParametersNode = null;
     	for (int i=0; i<methodDeclaratorNode.jjtGetNumChildren(); i++){
@@ -252,10 +159,12 @@ void MemberDecl():
     	}
     	
     	if(formalParametersNode != null){
-    		//get parameters
+    		Token t = formalParametersNode.jjtGetFirstToken();
+        	while(t != null){
+        		parameters = parameters + " " + t.toString();
+        		t = t.next;
+        	}
     	}
-    	
-        
     	
         node.childrenAccept(this, data);    
  
@@ -265,7 +174,12 @@ void MemberDecl():
 /*=========================Don't need to change after===========================================================*/
 
 
-   
+    public Object visit(MemberDecl node, Object data){
+    	
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
     public Object visit(IfStatement node, Object data){
     

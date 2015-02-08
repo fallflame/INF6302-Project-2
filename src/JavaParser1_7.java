@@ -21,7 +21,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
               //System.out.println("Parsing: " + s);
 
               JavaParser1_7 parser = new JavaParser1_7(s);
-              parser.CompilationUnit().jjtAccept(new TP2Visitor(), s); 
+              parser.CompilationUnit().jjtAccept(new TP2Visitor_v4(), s); 
 
                   }
             catch(ParseException e) { e.printStackTrace(); }
@@ -68,7 +68,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
     }
     try {
       // Yan: Add the .jjtAccept(new Visitor, fileName) to accept the visitor
-      parser.CompilationUnit().jjtAccept(new TP2Visitor(), fileName); 
+      parser.CompilationUnit().jjtAccept(new TP2Visitor_v4(), fileName); 
 
       //System.out.println("Java Parser Version 0.1:  Java program parsed successfully.");
     } catch (ParseException e) {

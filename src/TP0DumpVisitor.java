@@ -1,131 +1,41 @@
-import java.util.ArrayList;
-import java.util.Stack;
-
 /**
  * @author Yan Xu
  * 2015-01-16
  * This visitor give:
  * id, fileName, className, methodName, #if, #while, #break, #varLocal
  */
+import java.util.Stack;
 
+public class TP0DumpVisitor implements JavaParser1_7Visitor {
 
-public class TP2Visitor_pre implements JavaParser1_7Visitor {
-
-    static int id; // count the line number of the output
-
-    class ClassNode{
-    	private String className;
-    	private ArrayList<String> attributes;
-    	private ArrayList<String> methods;
-    	
-    	ClassNode(String className){
-    		this.className = className;
-    	}
-    	
-    	public void addAttribute(String attribute){
-    		this.attributes.add(attribute);
-    	}
-    	
-    	public void addMethod(String method){
-    		this.attributes.add(method);
-    	}
-    	
-    	public void printClassNode(){
-    		
-    		StringBuffer attributesStringBuffer = new StringBuffer();
-    		for (String s : attributes) {
-    			attributesStringBuffer.append(s + "&#92;n");
-    		}
-    		String attributesString = attributesStringBuffer.toString();
-    		
-    		StringBuffer methodsStringBuffer = new StringBuffer();
-    		for (String s : methods) {
-    			methodsStringBuffer.append(s + "&#92;n");
-    		}
-    		String methodsString = methodsStringBuffer.toString();
-    		
-    		
-    		String stringInGraphViz = 
-    				this.className + " [label= <" + 
-	    				"<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\">" +
-		    				"<TR><TD>" + this.className + "</TD></TR>" +
-		    				"<TR><TD ALIGN=\"LEFT\">" + attributesString + "</TD></TR>" +
-		    				"<TR><TD ALIGN=\"LEFT\">" + methodsString + "</TD></TR>" +
-	    				"</TABLE>" +
-    				">];";
-    		
-    		System.out.println(stringInGraphViz);
-    	}
-    }
 
 
     public Object visit(CompilationUnit node, Object data){
-    	
-    	Stack<ClassNode> classNodeStack = new Stack<ClassNode>();
-    	
-        node.childrenAccept(this, classNodeStack);
+        
+    	node.dump("");
+        node.childrenAccept(this, data);
 
         return data;  
     }
-    
-    public Object visit(ModifierList node, Object data){
-    	 
-    	
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
 
-    public Object visit(ClassBodyDeclaration node, Object data){
-    	
-    	
-    	Token t = node.jjtGetFirstToken();
-    	while(t != null && t.toString() != "{" && t.toString() != ";"){
-    		System.out.print(t.toString() + " ");
-    		t = t.next;
-    	}
-    	System.out.print("\n");
-    	
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
-    
     public Object visit(NormalClassDeclaration node, Object data){
-    	
-    	/*
-    	Token t = node.jjtGetFirstToken();
-    	while(t != null){
-    		System.out.print(t.toString());
-    		t = t.next;
-    	}
-    	*/
-    	
-    	//System.out.println(node.jjtGetLastToken().toString());
+
+
         node.childrenAccept(this, data);
 
         return data;  
     }
-    
-    
-    public Object visit(MemberDecl node, Object data){
-    	 
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
-     
+
+
     public Object visit(MethodBody node, Object data){
-    
+
         node.childrenAccept(this, data);    
- 
+
         return data;  
     }
 
-/*=========================Don't need to change after===========================================================*/
 
-
-   
+//This section is used to count the number of targeted statements
 
     public Object visit(IfStatement node, Object data){
     
@@ -154,7 +64,9 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
  
         return data;  
     }
-    
+
+/*=========================Don't need to change after===========================================================*/
+
     public Object visit(GenericMethodOrConstructorRest node, Object data){
     
         node.childrenAccept(this, data);
@@ -192,21 +104,21 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
     public Object visit(Identifier node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
   
         return data;    
     }
 
     public Object visit(QualifiedIdentifier node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
 
     public Object visit(QualifiedIdentifierList node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -220,14 +132,14 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
     public Object visit(Ellipsis node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
 
     public Object visit(HasEllipsis node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -241,7 +153,7 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
     public Object visit(PossibleStaticModifier node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -281,7 +193,12 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
-
+    public Object visit(ModifierList node, Object data){
+ 
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
     public Object visit(ClassDeclaration node, Object data){
  
@@ -292,7 +209,7 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
     public Object visit(InterfaceDeclaration node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -320,7 +237,7 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
     public Object visit(Type node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }
@@ -479,7 +396,12 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
-   
+    public Object visit(ClassBodyDeclaration node, Object data){
+ 
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
     public Object visit(StaticInitBlock node, Object data){
  
@@ -488,6 +410,12 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
+    public Object visit(MemberDecl node, Object data){
+ 
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
     public Object visit(MethodOrFieldDecl node, Object data){
  
@@ -659,7 +587,7 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
     public Object visit(VariableDeclarators node, Object data){
  
-        node.childrenAccept(this, data);
+        //node.childrenAccept(this, data);
  
         return data;  
     }

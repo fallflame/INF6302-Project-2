@@ -1,0 +1,6 @@
+digraph UMLS {node [shape = record]edge [arrowtail = empty]
+NestedClass [label=" {NestedClass||+ nestedMethod( ) \l}"]
+TestFile [label=" {TestFile|+ i : int\l+ j : int\l+ k : int\l+ static m : String\l- n : NestedClass\l|+ ConstructorMethod( ) \l+ voidMethod( )  : void\l+ static genericMethod( Class &lt; T &gt; clazz )  : T\l+ method( )  : int\l}"]
+NestedClass->TestFile [arrowhead=diamond]
+NestedClass->TestFile [arrowhead=empty]
+}

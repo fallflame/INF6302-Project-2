@@ -9,7 +9,7 @@ import java.util.Stack;
  */
 
 
-public class TP2Visitor_pre implements JavaParser1_7Visitor {
+public class TP2Visitor_v2 implements JavaParser1_7Visitor {
 
     static int id; // count the line number of the output
 
@@ -67,21 +67,38 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 
         return data;  
     }
-    
-    public Object visit(ModifierList node, Object data){
-    	 
+
+    public Object visit(NormalClassDeclaration node, Object data){
+    	
+    	Stack<ClassNode> classNodeStack = (Stack<ClassNode>) data;
+    	
+    	String className = "classNoName";
+    	for (int i = 0; i < node.jjtGetNumChildren(); i++){
+            SimpleNode childNode = (SimpleNode)node.jjtGetChild(i);
+            if (childNode.toString() == "Identifier"){
+                // get the method name
+                className = childNode.jjtGetFirstToken().toString(); 
+                break;
+            }
+        }
+    	
+    	classNodeStack.add(new ClassNode(className));
     	
         node.childrenAccept(this, data);
- 
+        
+        ClassNode classNode = classNodeStack.pop();
+        classNode.printClassNode();
+
         return data;  
     }
+    
 
     public Object visit(ClassBodyDeclaration node, Object data){
     	
-    	
+    	String classBodyString = "";
     	Token t = node.jjtGetFirstToken();
     	while(t != null && t.toString() != "{" && t.toString() != ";"){
-    		System.out.print(t.toString() + " ");
+    		classBodyString = classBodyString + " " + t.toString();
     		t = t.next;
     	}
     	System.out.print("\n");
@@ -91,32 +108,142 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
     
-    public Object visit(NormalClassDeclaration node, Object data){
-    	
-    	/*
-    	Token t = node.jjtGetFirstToken();
-    	while(t != null){
-    		System.out.print(t.toString());
-    		t = t.next;
-    	}
-    	*/
-    	
-    	//System.out.println(node.jjtGetLastToken().toString());
-        node.childrenAccept(this, data);
 
-        return data;  
-    }
-    
-    
-    public Object visit(MemberDecl node, Object data){
-    	 
+    public Object visit(FieldDeclaratorsRest node, Object data){
+ 
         node.childrenAccept(this, data);
  
         return data;  
     }
-     
-    public Object visit(MethodBody node, Object data){
     
+    public Object visit(MethodDeclaratorRest node, Object data){
+    	 
+    	/*
+    	//get method visibility
+    	String methodVisibility = "";
+    	SimpleNode currentNode = node;
+    	while(currentNode.toString() != "ClassBodyDeclaration"){
+    		currentNode = (SimpleNode) currentNode.parent;
+    	}
+    	ClassBodyDeclaration classBodyDeclarationNode = (ClassBodyDeclaration) currentNode;
+    	ModifierList modifierListNode = null;
+    	for(int i=0; i<classBodyDeclarationNode.jjtGetNumChildren(); i++){
+    		if (classBodyDeclarationNode.jjtGetChild(i).toString() == "ModifierList"){
+    			modifierListNode = (ModifierList)classBodyDeclarationNode.jjtGetChild(i);
+    		}
+    	}
+    	if (modifierListNode != null){
+    		for(int i=0; i<modifierListNode.jjtGetNumChildren(); i++){
+    			Modifier modifierNode = (Modifier) modifierListNode.jjtGetChild(i);
+    			String memberVisibilityName = modifierNode.jjtGetFirstToken().toString();
+    			
+    			switch (memberVisibilityName) {
+	                case "public":  	methodVisibility = "+"; break;
+	                case "private":  	methodVisibility = "-"; break;
+	                case "protected":  	methodVisibility = "#"; break;
+	                case "package":  	methodVisibility = "~"; break;
+	                default: 			methodVisibility = ""; break;
+	            }
+    		}
+    	}
+    	
+    	//get method
+    	String method = "";
+    	MemberDecl memberDeclNode = null;
+    	for(int i=0; i<classBodyDeclarationNode.jjtGetNumChildren(); i++){
+    		if(classBodyDeclarationNode.jjtGetChild(i).toString() == "MemberDecl"){
+    			memberDeclNode = (MemberDecl) classBodyDeclarationNode.jjtGetChild(i);
+    			break;
+    		}
+    	}
+    	
+    	if (memberDeclNode != null){
+    		Token t = memberDeclNode.jjtGetFirstToken();
+        	while(t != null && t.toString() != "{" && t.toString() != ";"){
+        		method = method + " " + t.toString();
+        		t = t.next;
+        	}
+    	}
+    	*/
+    	
+        node.childrenAccept(this, data);
+        
+        return data;  
+    }
+    
+    public Object visit(MethodBody node, Object data){
+    	/*
+    	//get methodName and return type
+    	String methodName = "";
+    	String methodReturnType = "void";
+    	SimpleNode currentNode = node;
+        while(methodName == ""){
+            currentNode = (SimpleNode)currentNode.jjtGetParent();
+            for (int i = 0; i < currentNode.jjtGetNumChildren(); i++){
+                SimpleNode childNode = (SimpleNode)currentNode.jjtGetChild(i);
+                if (childNode.toString() == "Type"){
+                	methodReturnType = "";
+                	Token t = childNode.jjtGetFirstToken();
+                	while(t != null){
+                		methodReturnType = methodReturnType + t.toString();
+                		t = t.next;
+                	}
+                }
+                
+                if (childNode.toString() == "Identifier"){
+                    methodName = childNode.jjtGetFirstToken().toString(); 
+                    break;
+                }
+            }
+        }
+        
+        //get method visibility
+    	String methodVisibility = "";
+    	currentNode = node;
+    	while(currentNode.toString() != "ClassBodyDeclaration"){
+    		currentNode = (SimpleNode) currentNode.parent;
+    	}
+    	ClassBodyDeclaration classBodyDeclarationNode = (ClassBodyDeclaration) currentNode;
+    	ModifierList modifierListNode = null;
+    	for(int i=0; i<classBodyDeclarationNode.jjtGetNumChildren(); i++){
+    		if (classBodyDeclarationNode.jjtGetChild(i).toString() == "ModifierList"){
+    			modifierListNode = (ModifierList)classBodyDeclarationNode.jjtGetChild(i);
+    		}
+    	}
+    	if (modifierListNode != null){
+    		for(int i=0; i<modifierListNode.jjtGetNumChildren(); i++){
+    			Modifier modifierNode = (Modifier) modifierListNode.jjtGetChild(i);
+    			String memberVisibilityName = modifierNode.jjtGetFirstToken().toString();
+    			
+    			switch (memberVisibilityName) {
+	                case "public":  	methodVisibility = "+"; break;
+	                case "private":  	methodVisibility = "-"; break;
+	                case "protected":  	methodVisibility = "#"; break;
+	                case "package":  	methodVisibility = "~"; break;
+	                default: 			methodVisibility = ""; break;
+	            }
+    		}
+    	}    	
+    	
+    	//get method parameters
+    	String parameters = "";
+    	SimpleNode methodDeclaratorNode = (SimpleNode) node.parent;
+    	FormalParameters formalParametersNode = null;
+    	for (int i=0; i<methodDeclaratorNode.jjtGetNumChildren(); i++){
+    		if(methodDeclaratorNode.jjtGetChild(i).toString() == "FormalParameters"){
+    			formalParametersNode = (FormalParameters) methodDeclaratorNode.jjtGetChild(i);
+    			break;
+    		}
+    	}
+    	
+    	if(formalParametersNode != null){
+    		Token t = formalParametersNode.jjtGetFirstToken();
+        	while(t != null){
+        		parameters = parameters + " " + t.toString();
+        		t = t.next;
+        	}
+    	}
+    	*/
         node.childrenAccept(this, data);    
  
         return data;  
@@ -125,7 +252,12 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
 /*=========================Don't need to change after===========================================================*/
 
 
-   
+    public Object visit(MemberDecl node, Object data){
+    	
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
     public Object visit(IfStatement node, Object data){
     
@@ -176,12 +308,6 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
-    public Object visit(MethodDeclaratorRest node, Object data){
- 
-        node.childrenAccept(this, data);
-        
-        return data;  
-    }
 
     public Object visit(SimpleNode node, Object data){
  
@@ -281,7 +407,12 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
-
+    public Object visit(ModifierList node, Object data){
+ 
+        node.childrenAccept(this, data);
+ 
+        return data;  
+    }
 
     public Object visit(ClassDeclaration node, Object data){
  
@@ -479,7 +610,6 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
-   
 
     public Object visit(StaticInitBlock node, Object data){
  
@@ -503,12 +633,6 @@ public class TP2Visitor_pre implements JavaParser1_7Visitor {
         return data;  
     }
 
-    public Object visit(FieldDeclaratorsRest node, Object data){
- 
-        node.childrenAccept(this, data);
- 
-        return data;  
-    }
 
     public Object visit(EmptyBody node, Object data){
  
