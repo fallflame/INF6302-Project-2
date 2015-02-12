@@ -14,6 +14,7 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     static int id; // count the line number of the output
     static ArrayList<ClassNode> classNodeList = new ArrayList<>();
     static ArrayList<Relation> relationList = new ArrayList<>();
+    //static String relationListString;
     
     class Relation{
     	private String fromNode;
@@ -26,7 +27,7 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     		this.relation = relation;
     	}
     	
-    	public String getRelation(){
+    	public String getRelationString(){
     		
     		String r = "";
     		
@@ -34,9 +35,14 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     			r = fromNode + "->" + toNode + " [arrowhead=diamond]";
     		if (relation == "generalization")
     			r = fromNode + "->" + toNode + " [arrowhead=empty]";
-    		
     		return r;
     	}
+    	
+    	public boolean equals(Relation r){
+			return (this.fromNode.equals(r.fromNode) 
+					&& this.toNode.equals(r.toNode) 
+					&& this.relation.equals(r.relation));
+    	};
     }
     
     class ClassNode{
@@ -68,7 +74,7 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     		for (String s : methods) {
     			methodsStringBuffer.append(s + "\\l");
     		}
-    		String methodsString = methodsStringBuffer.toString();
+    		String methodsString = methodsStringBuffer.toString().replace("\"", "\\\"");
     		
     		
     		String stringInGraphViz = 
@@ -77,48 +83,65 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
 							attributesString + "|" +
 							methodsString +
 					"}\"]";
-    		
-    		/*stringInGraphViz = stringInGraphViz.replace(" ( ", "(");
-    		stringInGraphViz = stringInGraphViz.replace(" )", ")");
-    		stringInGraphViz = stringInGraphViz.replace("< ", "<");
-    		stringInGraphViz = stringInGraphViz.replace(" >", ">");
-    		stringInGraphViz = stringInGraphViz.replace(" [ ", "[");
-    		stringInGraphViz = stringInGraphViz.replace(" ]", "]");
-    		*/
+
     		stringInGraphViz = stringInGraphViz.replace("<", "&lt;");
     		stringInGraphViz = stringInGraphViz.replace(">", "&gt;");
-    		/*
-    		stringInGraphViz = stringInGraphViz.replace("public ", "+ ");
-    		stringInGraphViz = stringInGraphViz.replace("private ", "- ");
-    		stringInGraphViz = stringInGraphViz.replace("protected ", "# ");
-    		stringInGraphViz = stringInGraphViz.replace("package ", "~ ");
-    		*/
+
     		System.out.println(stringInGraphViz);
+    	}
+    }
+    
+    public static void printNodes(){
+    	
+    	//ArrayList<String> classNodeName = new ArrayList<>();
+    	for (ClassNode cn : TP2Visitor_v4.classNodeList){
+    		cn.printClassNode();
+    		//classNodeName.add(cn.className);
+    	}
+    }
+    
+    private void addRelation(Relation relation){
+    	boolean duplicated = false;
+    	
+    	for (Relation r : TP2Visitor_v4.relationList){
+    		if(r.equals(relation)){
+    			duplicated = true;
+    			break;
+    		}
+    	}
+    	
+    	if(!duplicated){
+    		TP2Visitor_v4.relationList.add(relation);
     	}
     	
     }
     
-    private void printResult(){
-    	System.out.println("digraph UMLS {node [shape = record]edge [arrowtail = empty]");
-    	
-    	ArrayList<String> classNodeName = new ArrayList<>();
+    public static void printRelations(){
+    	//this.removeDuplicatedRelations();
+    	//ArrayList<String> formedRelation = new ArrayList<>();
+    	//relationListString = "";
+    	ArrayList<String> classNodesName = new ArrayList<>();
     	for (ClassNode cn : TP2Visitor_v4.classNodeList){
-    		cn.printClassNode();
-    		classNodeName.add(cn.className);
+    		classNodesName.add(cn.className);
     	}
     	
-    	ArrayList<String> formedRelation = new ArrayList<>();
+    	
     	for (Relation r : TP2Visitor_v4.relationList){
-    		if (classNodeName.contains(r.fromNode) && classNodeName.contains(r.toNode)){
-    			String formedRelationString = r.getRelation();
-    			if (!formedRelation.contains(formedRelationString)){
-    				formedRelation.add(formedRelationString);
-    				System.out.println(formedRelationString);
-    			}
-    		}
+    		//if (classNodesName.contains(r.fromNode) && classNodesName.contains(r.toNode)){
+    		System.out.println(r.getRelationString());
+    		//}
+//    		if (classNodeName.contains(r.fromNode) && classNodeName.contains(r.toNode)){
+//    			String formedRelationString = r.getRelation();
+//    			if (!formedRelation.contains(formedRelationString)){
+//    				formedRelation.add(formedRelationString);
+//    				relationListString = relationListString + formedRelationString + "\n";
+//    				//System.out.println(formedRelationString);
+//    			}
+//    		}
     	}
     	
-    	System.out.println("}");
+    	//System.out.println("}");
+    	
     }
     
     private String getFirstToken(Node node){
@@ -176,7 +199,7 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     	
         node.childrenAccept(this, classNodeStack);
         
-        this.printResult();
+        //this.printNodes();
 
         return data;  
     }
@@ -188,12 +211,17 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     	
     	Stack<ClassNode> classNodeStack = (Stack<ClassNode>) data;
     	
-    	String className = "classNoName";
+    	String className = "";
+    	
+    	for (ClassNode n : classNodeStack){
+    		className = className + n.className + ".";
+    	}
+    	
     	for (int i = 0; i < node.jjtGetNumChildren(); i++){
             SimpleNode childNode = (SimpleNode)node.jjtGetChild(i);
             if (childNode.toString() == "Identifier"){
                 // get the class name
-                className = childNode.jjtGetFirstToken().toString(); 
+                className = className + childNode.jjtGetFirstToken().toString(); 
                 break;
             }
         }
@@ -205,7 +233,15 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
             if (childNode.toString() == "Type"){
                 // get the its parent 
             	
-            	TP2Visitor_v4.relationList.add(new Relation(className, getFirstToken(childNode), "generalization"));
+            	String type = "";
+            	Token t = childNode.jjtGetFirstToken();
+            	while(t != null){
+            		type = type + t.toString();
+            		if (t == childNode.jjtGetLastToken()) break;
+            		t = t.next;
+            	}
+            	
+            	this.addRelation(new Relation(className, type, "generalization"));
                 break;
             }
         }
@@ -233,7 +269,7 @@ public class TP2Visitor_v4 implements JavaParser1_7Visitor {
     	
     	if (node.jjtGetParent().jjtGetParent().jjtGetChild(0).jjtGetChild(0).toString() != "BasicType"){ // if it is not a BasicType, add a relationship
     		
-    		TP2Visitor_v4.relationList.add(new Relation(type, classNodeStack.peek().className, "composition"));
+    		this.addRelation(new Relation(type, classNodeStack.peek().className, "composition"));
     	}
     	
     	for(int i=0; i<node.jjtGetNumChildren(); i++){

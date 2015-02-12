@@ -81,6 +81,7 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
    public static void main(String[] args) throws Throwable
    {
       int cnt = 1;
+      System.out.println("digraph UML {node [shape = record]edge [arrowtail = empty]");
       long l = System.currentTimeMillis();
       if (args.length > 0 && args[0].charAt(0) == '@')
       {
@@ -91,6 +92,10 @@ public class JavaParser1_7/*@bgen(jjtree)*/implements JavaParser1_7TreeConstants
          JavaParser1_7.m(args);
       }
       //System.out.println("Parsed " + cnt + " files in: " + (System.currentTimeMillis() - l));
+      TP2Visitor_v4.printNodes();
+      TP2Visitor_v4.printRelations();
+      //System.out.println(TP2Visitor_v4.relationListString);
+      System.out.println("}");
    }
 
   final public void Identifier() throws ParseException {
